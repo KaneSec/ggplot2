@@ -15,7 +15,8 @@ Let's create a bar chart and then improve it based on the Data Visualisation Che
 library(ggplot2)
 library(dplyr)
 
-youtube <- read.csv('data/Youtube.csv')
+#youtube <- read.csv('data/Youtube.csv')
+youtube <- read.csv('https://raw.githubusercontent.com/KaneSec/ggplot2/main/data/Youtube.csv')
 head(youtube)
 
 # A basic bar chart
