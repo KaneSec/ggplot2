@@ -1,0 +1,163 @@
+---
+title: "Week 3 (Data Visualisation Course)"
+author: "Kane"
+date: "11/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's create a bar chart and then improve it based on the Data Visualisation Checklist (http://stephanieevergreen.com/wp-content/uploads/2016/10/DataVizChecklist_May2016.pdf)
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+youtube <- read.csv('data/Youtube.csv')
+head(youtube)
+
+# A basic bar chart
+ggplot(youtube, aes(x =category)) + 
+  geom_bar() 
+
+# Readable?
+ggplot(youtube, aes(x =category)) + 
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = -90, hjust=0))
+
+# 6-12 word descriptive title is left-justified in upper left corner
+ggplot(youtube, aes(x =category)) + 
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = -90, hjust=0)) +
+  labs(title = "Count of the Most Popular Youtube Videos by Category", 
+       x = "Category",
+       y = "count")
+
+# Text is horizontal
+ggplot(youtube, aes(x =category)) + 
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = -90, hjust=0)) +
+  labs(title = "Count of the Most Popular Youtube Videos by Category", 
+       x = "Category",
+       y = "count") +
+  coord_flip()
+
+# Text is horizontal (x axis)
+ggplot(youtube, aes(x =category)) + 
+  geom_bar() +
+  labs(title = "Number of Top Youtube authors in different categories", 
+       x = "Category",
+       y = "count") +
+  coord_flip()
+
+# Data are labeled directly
+youtube_cat <- youtube %>% group_by(category) %>% summarize(count=n(), .groups = 'drop') 
+ggplot(youtube_cat, aes(x =category, y = count)) + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), hjust = -0.2, size = 3.5) + 
+  labs(title = "Count of the Most Popular Youtube Videos by Category", 
+       x = "Category",
+       y = "count") +
+  coord_flip()
+
+# Fix the axis limit
+ggplot(youtube_cat, aes(x =category, y = count)) + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), hjust = -0.2, size = 3.5) + 
+  labs(title = "Count of the Most Popular Youtube Videos by Category", 
+       x = "Category",
+       y = "count") +
+  ylim(0, 6000) +
+  coord_flip()
+
+# Data are intentionally ordered
+ggplot(youtube_cat, aes(x = reorder(category, count), y = count)) + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), hjust = -0.2, size = 3.5) + 
+  labs(title = "Count of the Most Popular Youtube Videos by Category", 
+       x = "Category",
+       y = "count") +
+  ylim(0, 6000) +
+  coord_flip()
+
+# gridline
+ggplot(youtube_cat, aes(x = reorder(category, count), y = count)) + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), hjust = -0.2, size = 3.5) + 
+  labs(title = "Count of the Most Popular Youtube Videos by Category", 
+       x = "Category",
+       y = "count") +
+  ylim(0, 6000) +
+  coord_flip() +
+  theme_classic()
+
+
+
+```
+
+```{r}
+
+covid <- read.csv("http://raw.githubusercontent.com/owid/covid-19-data/master/public/data/ecdc/full_data.csv")
+
+location <- read.csv('https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/ecdc/locations.csv')
+
+covid_yesterday <- filter(covid, date == '2020-11-08' & location != "World")
+
+covid_yesterday <- merge(covid_yesterday, location, all.x = TRUE)
+head(covid_yesterday)
+
+```
+
+
+
+```{r}
+
+
+ggplot(covid_yesterday, aes(x = total_cases, y = total_deaths)) + 
+  geom_point() +
+  labs(title = "Covid-19 Total Cases & Deaths by Country", 
+       x = "Total Cases",
+       y = "Total Deaths") +
+  scale_x_continuous(trans='log10', labels = scales::comma) +
+  scale_y_continuous(trans='log10', labels = scales::comma)
+
+
+# Colour by continent
+ggplot(covid_yesterday, aes(x = total_cases, y = total_deaths, color = continent)) + 
+  geom_point() +
+  labs(title = "Covid-19 Total Cases & Deaths by Country", 
+       x = "Total Cases",
+       y = "Total Deaths") +
+  scale_x_continuous(trans='log10', labels = scales::comma) +
+  scale_y_continuous(trans='log10', labels = scales::comma) 
+
+
+cols <- c("North America" = "#e41a1c",
+          "South America" = "#984ea3",
+          "Europe" = "#ff7f00",
+          "Africa" = "#a6cee3",
+          "Asia" = "#377eb8",
+          "Oceania" = "#a65628")
+
+ggplot(covid_yesterday, aes(x = total_cases, y = total_deaths, color = continent, na.rm=TRUE)) + 
+  geom_point() +
+  labs(title = "Covid-19 Total Cases & Deaths by Country", 
+       x = "Total Cases",
+       y = "Total Deaths",
+       caption = "Data source: Our World in Data (https://github.com/owidbot)") +
+  scale_x_continuous(trans='log10', labels = scales::comma) +
+  scale_y_continuous(trans='log10', labels = scales::comma) +
+  scale_colour_manual(
+    values = cols
+  ) +
+  annotate(geom = "text", x = 100000, y = 30, label = "Singapore", hjust = "left") +
+  theme(
+    plot.caption = element_text(hjust = 0)
+  )
+
+
+
+```
+
